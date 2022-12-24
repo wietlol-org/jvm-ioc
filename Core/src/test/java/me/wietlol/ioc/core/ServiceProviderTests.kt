@@ -236,4 +236,39 @@ class ServiceProviderTests : LocalTestModule()
 		assertThat(named.get<String>())
 			.isEqualTo("test")
 	}
+	
+	@Test
+	fun `assert that when multiple services are registered, the last service is the service that is resolved`() = unitTest {
+		val provider = serviceCollection {
+			single { "test1" }
+			single { "test2" }
+		}
+		
+		assertThat(provider.get<String>())
+			.isEqualTo("test2")
+	}
+	
+	@Test
+	fun `assert that when multiple services are registered, all services can be resolved`() = unitTest {
+		val provider = serviceCollection {
+			single { "test1" }
+			single { "test2" }
+		}
+		
+		assertThat(provider.getAll<String>().toList())
+			.isEqualTo(listOf("test1", "test2"))
+	}
+	
+	@Test
+	fun `assert that when multiple services are registered, all services can be resolved when named`() = unitTest {
+		val provider = serviceCollection {
+			single("name") { "test1" }
+			single("name") { "test2" }
+		}
+		
+		val named = provider.named("name")
+		
+		assertThat(named.getAll<String>().toList())
+			.isEqualTo(listOf("test1", "test2"))
+	}
 }

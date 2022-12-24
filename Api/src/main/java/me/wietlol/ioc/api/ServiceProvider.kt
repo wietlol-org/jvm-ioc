@@ -15,6 +15,8 @@ interface ServiceProvider
 	
 	fun <T> get(name: String, type: KType): T
 	
+	fun <T : Any> getAll(type: KType): Sequence<T>
+	
 	operator fun <T> getValue(instance: Any?, property: KProperty<*>): T
 	
 	/*protected*/ fun <T> getValue(entry: ServiceEntry<*>?, type: KType, resolvingType: Class<*>): T
@@ -49,3 +51,6 @@ inline fun <reified T> ServiceProvider.get(): T =
 
 inline fun <reified T> ServiceProvider.get(name: String): T =
 	get(name, typeOf<T>())
+
+inline fun <reified T : Any> ServiceProvider.getAll(): Sequence<T> =
+	getAll(typeOf<T>())

@@ -14,7 +14,7 @@ class StringServiceCollection(
 	override val entries: List<ServiceEntry<*>>
 ) : ServiceProvider
 {
-	val registry: Map<String, ServiceEntry<*>> = entries.associateBy { key(it) }
+	val registry: Map<String, List<ServiceEntry<*>>> = entries.groupBy { key(it) }
 	private val caches = TreeMap<Double, MutableMap<String, Any?>>().descendingMap()
 	
 	override fun named(name: String): ServiceProvider =
@@ -26,6 +26,9 @@ class StringServiceCollection(
 	override fun <T> get(name: String, type: KType): T =
 		getServiceByType(name, type)
 	
+	override fun <T : Any> getAll(type: KType): Sequence<T> =
+		getAllServicesByType(null, type)
+	
 	override fun <T> getValue(instance: Any?, property: KProperty<*>): T =
 		getServiceByType(null, property.returnType)
 	
@@ -35,6 +38,29 @@ class StringServiceCollection(
 		val resolvingType = type.jvmErasure.java
 		val key = key(name, resolvingType)
 		
+		val entries = registry[key] ?: emptyList()
+		val entry = entries.lastOrNull()
+		
+		return getService(entry, "$key[${entries.size - 1}]", type, resolvingType)
+	}
+	
+	@Throws(IllegalServiceFactoryException::class, IllegalServiceTypeException::class, MissingServiceException::class)
+	internal fun <T> getAllServicesByType(name: String?, type: KType, filter: (ServiceEntry<*>) -> Boolean = {true}): Sequence<T>
+	{
+		val resolvingType = type.jvmErasure.java
+		val key = key(name, resolvingType)
+		
+		val entries = registry[key] ?: emptyList()
+		
+		return entries
+			.asSequence()
+			.withIndex()
+			.filter { filter(it.value) }
+			.map { getService(it.value, "$key[${it.index}]", type, resolvingType) }
+	}
+	
+	private fun <T> getService(entry: ServiceEntry<*>?, key: String, type: KType, resolvingType: Class<*>): T
+	{
 		val cached = caches.entries
 			.map { it.value[key] }
 			.firstOrNull()
@@ -42,8 +68,6 @@ class StringServiceCollection(
 		@Suppress("UNCHECKED_CAST")
 		if (cached != null)
 			return cached as T
-		
-		val entry = registry[key]
 		
 		val service = getValue<T>(entry, type, resolvingType)
 		

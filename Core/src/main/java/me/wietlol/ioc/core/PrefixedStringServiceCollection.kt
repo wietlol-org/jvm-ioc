@@ -24,6 +24,9 @@ class PrefixedStringServiceCollection(
 	override fun <T> get(name: String, type: KType): T =
 		provider.get("$prefix$name", type)
 	
+	override fun <T : Any> getAll(type: KType): Sequence<T> =
+		provider.getAllServicesByType(prefix, type)
+	
 	override fun <T> getValue(instance: Any?, property: KProperty<*>): T =
 		provider.get(prefix, property.returnType)
 }
