@@ -205,6 +205,24 @@ class ServiceProviderTests : LocalTestModule()
 	}
 	
 	@Test
+	fun `assert that registering an existing service provider, retains single entry cache`() = unitTest {
+		var counter = 0
+		val baseProvider = serviceCollection {
+			single { counter++; "test" }
+		}
+		
+		val provider = serviceCollection {
+			register(baseProvider)
+		}
+		
+		val item1 = baseProvider.get<String>()
+		val item2 = provider.get<String>()
+		
+		assertThat(counter)
+			.isEqualTo(1)
+	}
+	
+	@Test
 	fun `assert that named service providers, can resolve named services by decoration`() = unitTest {
 		val provider = serviceCollection {
 			single("name") { "test" }

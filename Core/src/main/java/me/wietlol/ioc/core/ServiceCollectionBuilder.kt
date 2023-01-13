@@ -29,12 +29,27 @@ class ServiceCollectionBuilder
 	
 	fun register(provider: ServiceProvider)
 	{
-		provider.entries.forEach { register(it) }
+		provider.entries.forEach {
+			register(it.proxiedTo(provider))
+		}
 	}
 	
 	fun build(): ServiceProvider =
 		StringServiceCollection(entries)
 }
+
+private fun <T : Any> ServiceEntry<T>.proxiedTo(provider: ServiceProvider) =
+	proxied {
+		provider.getValue(this@proxiedTo, type, type.javaClass)
+	}
+
+private fun <T : Any> ServiceEntry<T>.proxied(factory: ServiceProvider.() -> T) =
+	ServiceEntry(
+		name,
+		type,
+		scope,
+		factory
+	)
 
 fun serviceCollection(builder: ServiceCollectionBuilder.() -> Unit): ServiceProvider =
 	ServiceCollectionBuilder()

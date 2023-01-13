@@ -15,7 +15,7 @@ class StringServiceCollection(
 ) : ServiceProvider
 {
 	val registry: Map<String, List<ServiceEntry<*>>> = entries.groupBy { key(it) }
-	private val caches = TreeMap<Double, MutableMap<String, Any?>>().descendingMap()
+	private val caches = TreeMap<Double, MutableMap<ServiceEntry<*>, Any?>>().descendingMap()
 	
 	override fun named(name: String): ServiceProvider =
 		PrefixedStringServiceCollection(name, this)
@@ -41,7 +41,7 @@ class StringServiceCollection(
 		val entries = registry[key] ?: emptyList()
 		val entry = entries.lastOrNull()
 		
-		return getService(entry, "$key[${entries.size - 1}]", type, resolvingType)
+		return getValue(entry, type, resolvingType)
 	}
 	
 	@Throws(IllegalServiceFactoryException::class, IllegalServiceTypeException::class, MissingServiceException::class)
@@ -56,23 +56,26 @@ class StringServiceCollection(
 			.asSequence()
 			.withIndex()
 			.filter { filter(it.value) }
-			.map { getService(it.value, "$key[${it.index}]", type, resolvingType) }
+			.map { getValue(it.value, type, resolvingType) }
 	}
 	
-	private fun <T> getService(entry: ServiceEntry<*>?, key: String, type: KType, resolvingType: Class<*>): T
+	override fun <T> getValue(entry: ServiceEntry<*>?, type: KType, resolvingType: Class<*>): T
 	{
-		val cached = caches.entries
-			.map { it.value[key] }
-			.firstOrNull()
+		if (entry != null)
+		{
+			val cached = caches.entries
+				.map { it.value[entry] }
+				.firstOrNull()
+			
+			@Suppress("UNCHECKED_CAST")
+			if (cached != null)
+				return cached as T
+		}
 		
-		@Suppress("UNCHECKED_CAST")
-		if (cached != null)
-			return cached as T
-		
-		val service = getValue<T>(entry, type, resolvingType)
+		val service = super.getValue<T>(entry, type, resolvingType)
 		
 		if (entry != null && entry.scope < 1.0)
-			caches.computeIfAbsent(entry.scope) { hashMapOf() }[key] = service
+			caches.computeIfAbsent(entry.scope) { hashMapOf() }[entry] = service
 		
 		return service
 	}
