@@ -1,6 +1,6 @@
-package me.wietlol.ioc.core
+package ioc.core
 
-import me.wietlol.ioc.api.*
+import ioc.api.*
 import org.junit.Test
 import kotlin.reflect.typeOf
 

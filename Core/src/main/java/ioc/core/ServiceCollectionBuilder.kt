@@ -1,8 +1,8 @@
-package me.wietlol.ioc.core
+package ioc.core
 
-import me.wietlol.ioc.api.ServiceEntry
-import me.wietlol.ioc.api.ServiceProvider
-import me.wietlol.ioc.api.ServiceScope
+import ioc.api.ServiceEntry
+import ioc.api.ServiceProvider
+import ioc.api.ServiceScope
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 

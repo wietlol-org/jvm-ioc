@@ -1,10 +1,10 @@
-package me.wietlol.ioc.core
+package ioc.core
 
-import me.wietlol.ioc.api.IllegalServiceFactoryException
-import me.wietlol.ioc.api.IllegalServiceTypeException
-import me.wietlol.ioc.api.MissingServiceException
-import me.wietlol.ioc.api.ServiceEntry
-import me.wietlol.ioc.api.ServiceProvider
+import ioc.api.IllegalServiceFactoryException
+import ioc.api.IllegalServiceTypeException
+import ioc.api.MissingServiceException
+import ioc.api.ServiceEntry
+import ioc.api.ServiceProvider
 import java.util.TreeMap
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType

@@ -1,4 +1,4 @@
-package me.wietlol.ioc.api
+package ioc.api
 
 enum class ServiceScope(
 	val priority: Double

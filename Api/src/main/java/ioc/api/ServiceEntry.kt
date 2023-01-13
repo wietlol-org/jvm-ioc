@@ -1,4 +1,4 @@
-package me.wietlol.ioc.api
+package ioc.api
 
 import kotlin.reflect.KType
 
